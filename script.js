@@ -51,14 +51,32 @@ processSteps.forEach(step => {
 });
 
 const navLinks = [...document.querySelectorAll('.desktop-nav a')];
-const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
-const navObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`));
+
+const sections = navLinks
+  .map(link => document.querySelector(link.getAttribute('href')))
+  .filter(Boolean);
+
+function updateActiveNav() {
+  const marker = window.scrollY + window.innerHeight * 0.4;
+  let activeSection = sections[0];
+
+  for (const section of sections) {
+    if (section.offsetTop <= marker) {
+      activeSection = section;
+    } else {
+      break;
+    }
+  }
+
+  navLinks.forEach(link => {
+    const active = link.getAttribute('href') === `#${activeSection.id}`;
+    link.classList.toggle('active', active);
   });
-}, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
-sections.forEach(section => navObserver.observe(section));
+}
+
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+window.addEventListener('resize', updateActiveNav);
+updateActiveNav();
 
 const cursor = document.getElementById('cursorDot');
 if (cursor && window.matchMedia('(pointer:fine)').matches) {
